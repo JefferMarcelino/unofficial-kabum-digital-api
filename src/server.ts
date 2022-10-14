@@ -8,10 +8,8 @@ const PORT = process.env.PORT || 3000
 const app = express()
 app.use(bodyParser.json())
 
-
-app.get("/latest-news", async (req:any, res:any) => {
+app.get("/news", async (req:any, res:any) => {
     const postsLinks = await getPostsLinks()
-    console.log("Posts Links already got.")
     const posts = []
     
     for(let index = 0; index < 4; index++) {
