@@ -14,17 +14,15 @@ function generateRandomInteger(max:number) {
 
 app.get("/random", async (req, res) => {
     const postsLinks = await getPostsLinks("all")
-    const alreadyFetched: number[] = []
-    const posts = []
+    const posts:any[] = []
 
     if (postsLinks?.length) {
-        while (alreadyFetched.length < 4) {
+        while (posts.length < 10) {
             const index = generateRandomInteger(postsLinks.length)
+            
             try {
-                if (!alreadyFetched.includes(index)) {
-                    const post = await getPostByLink(postsLinks[index])
-                    posts.push(post)
-                    alreadyFetched.push(index)
+                if (!posts.includes(postsLinks[index])) {
+                    posts.push(postsLinks[index])
                 }
             }
             catch (err) {
