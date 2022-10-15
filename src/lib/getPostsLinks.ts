@@ -1,12 +1,12 @@
 import axios from "axios";
 import { load } from "cheerio";
 
-const getPostsLinks = async () => {
+const getPostsLinks = async (className:string) => {
     const latestNews = await axios.get("https://kabum.digital/")
 
     const $ = load(latestNews.data + ""); 
     
-    const recentPosts = $('.cnvs-block-section')
+    const recentPosts = $(className)
     .map((_, post) => { 
         const $post:any = $(post);
 
