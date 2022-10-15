@@ -13,42 +13,39 @@ function generateRandomInteger(max:number) {
 }
 
 app.get("/random", async (req, res) => {
-    const postsLinks = await getPostsLinks(".cnvs-block-section")
+    const postsLinks = await getPostsLinks("all")
     const alreadyFetched: number[] = []
     const posts = []
 
-    while (alreadyFetched.length < 4) {
-        const index = generateRandomInteger(postsLinks.length)
-        try {
-            if (!alreadyFetched.includes(index)) {
-                const post = await getPostByLink(postsLinks[index])
-                posts.push(post)
-                alreadyFetched.push(index)
+    if (postsLinks?.length) {
+        while (alreadyFetched.length < 4) {
+            const index = generateRandomInteger(postsLinks.length)
+            try {
+                if (!alreadyFetched.includes(index)) {
+                    const post = await getPostByLink(postsLinks[index])
+                    posts.push(post)
+                    alreadyFetched.push(index)
+                }
             }
-        }
-        catch (err) {
-            console.log("Nada")
+            catch (err) {
+                console.log("Nada")
+            }
         }
     }
 
     res.status(200).send({"posts": posts}).end()
 })
 
-app.get("/mostread", async (req, res) => {
-    const postsLinks = await getPostsLinks(".cnvs-block-section-1587397232048")
-    const posts = []
-    
-    for(let index = 0; index < 4; index++) {
-        try {
-            const post = await getPostByLink(postsLinks[index])
-            posts.push(post)
-        }
-        catch (err) {
-            console.log("Nada")
-        }
-    }
+app.get("/all", async (req, res) => {
+    const postsLinks = await getPostsLinks("all")
 
-    res.status(200).send({"posts": posts}).end()
+    res.status(200).send({"postsLinks": postsLinks}).end()
+})
+
+app.get("/mostread", async (req, res) => {
+    const postsLinks = await getPostsLinks("mostread")
+
+    res.status(200).send({"posts": postsLinks}).end()
 })
 
 app.get("/post/:id", async (req, res) => {
