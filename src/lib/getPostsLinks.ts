@@ -1,7 +1,7 @@
 import axios from "axios";
 import { load } from "cheerio";
 
-const getPostsLinks = async (category: "mostread" | "all") => {
+const getPostsLinks = async (category: "mostread" | "all", page?:number) => {
     if (category == "mostread") {
         const latestNews = await axios.get("https://kabum.digital/")
 
@@ -33,40 +33,37 @@ const getPostsLinks = async (category: "mostread" | "all") => {
     } else if (category == "all") {
         let next = true
         var allLinks: any[] = []
-        let index = 0
+        let index = page || 1
 
-        while (next) {
-            try {
-                let latestNews = await axios.get(`https://kabum.digital/page/${index}/?s=a`)
-                const $ = load(latestNews.data); 
+        try {
+            let latestNews = await axios.get(`https://kabum.digital/page/${index}/?s=a`)
+            const $ = load(latestNews.data); 
 
-                const allPosts = $("#primary")
-                .map((_, post) => { 
-                    const $post:any = $(post);
+            const allPosts = $("#primary")
+            .map((_, post) => { 
+                const $post:any = $(post);
 
-                    const $titles = $post.find(".cs-entry__title")
-                    .map((_:any, title:any) => { 
-                        const $title:any = $(title); 
-                        const $link = $title.find("a")
-                        var link = $link.attr('href');
-                        
-                        if (link && title) {
-                            return {
-                                title: $title.text().trim(),
-                                link: link
-                            }
+                const $titles = $post.find(".cs-entry__title")
+                .map((_:any, title:any) => { 
+                    const $title:any = $(title); 
+                    const $link = $title.find("a")
+                    var link = $link.attr('href');
+                    
+                    if (link && title) {
+                        return {
+                            title: $title.text().trim(),
+                            link: link
                         }
-                    }) 
-                    .toArray(); 
-
-                    return $titles
+                    }
                 }) 
-                .toArray();
-                allLinks.push(...allPosts)
-                index++
-            } catch (err) {
-                next = false
-            }
+                .toArray(); 
+
+                return $titles
+            }) 
+            .toArray();
+            allLinks.push(...allPosts)
+        } catch (err) {
+            console.log(err)
         }
 
         return allLinks

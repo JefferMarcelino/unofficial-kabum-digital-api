@@ -2,42 +2,27 @@ import express from 'express'
 import bodyParser from "body-parser"
 import getPostsLinks from './lib/getPostsLinks'
 import getPostByLink from './lib/getPostByLink'
-import timeout from "connect-timeout"
+import timout from "connect-timeout"
 
 const PORT = process.env.PORT || 3000 
 
 const app = express()
 app.use(bodyParser.json())
-app.use(timeout('135s'))
 
 function generateRandomInteger(max:number) {
     return Math.floor(Math.random() * max) + 1;
 }
 
 app.get("/random", async (req, res) => {
-    const postsLinks = await getPostsLinks("all")
-    const posts:any[] = []
+    const page = generateRandomInteger(30)
+    const postsLinks = await getPostsLinks("all", page)
 
-    if (postsLinks?.length) {
-        while (posts.length < 10) {
-            const index = generateRandomInteger(postsLinks.length)
-
-            try {
-                if (!posts.includes(postsLinks[index])) {
-                    posts.push(postsLinks[index])
-                }
-            }
-            catch (err) {
-                console.log("Nada")
-            }
-        }
-    }
-
-    res.status(200).send({"posts": posts}).end()
+    res.status(200).send({"posts": postsLinks}).end()
 })
 
-app.get("/all", async (req, res) => {
-    const postsLinks = await getPostsLinks("all")
+app.get("/all/:page", async (req, res) => {
+    const page = Number(req.params.page)
+    const postsLinks = await getPostsLinks("all", page)
 
     res.status(200).send({"postsLinks": postsLinks}).end()
 })
