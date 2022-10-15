@@ -2,11 +2,13 @@ import express from 'express'
 import bodyParser from "body-parser"
 import getPostsLinks from './lib/getPostsLinks'
 import getPostByLink from './lib/getPostByLink'
+import timeout from "connect-timeout"
 
 const PORT = process.env.PORT || 3000 
 
 const app = express()
 app.use(bodyParser.json())
+app.use(timeout('135s'))
 
 function generateRandomInteger(max:number) {
     return Math.floor(Math.random() * max) + 1;
@@ -19,7 +21,7 @@ app.get("/random", async (req, res) => {
     if (postsLinks?.length) {
         while (posts.length < 10) {
             const index = generateRandomInteger(postsLinks.length)
-            
+
             try {
                 if (!posts.includes(postsLinks[index])) {
                     posts.push(postsLinks[index])
