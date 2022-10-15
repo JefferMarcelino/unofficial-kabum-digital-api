@@ -8,14 +8,23 @@ const PORT = process.env.PORT || 3000
 const app = express()
 app.use(bodyParser.json())
 
-app.get("/all", async (req:any, res:any) => {
+function generateRandomInteger(max:number) {
+    return Math.floor(Math.random() * max) + 1;
+}
+
+app.get("/random", async (req:any, res:any) => {
     const postsLinks = await getPostsLinks(".cnvs-block-section")
+    const alreadyFetched: number[] = []
     const posts = []
-    
-    for(let index = 0; index < 4; index++) {
+
+    while (alreadyFetched.length < 4) {
+        const index = generateRandomInteger(postsLinks.length)
         try {
-            const post = await getPostByLink(postsLinks[index])
-            posts.push(post)
+            if (!alreadyFetched.includes(index)) {
+                const post = await getPostByLink(postsLinks[index])
+                posts.push(post)
+                alreadyFetched.push(index)
+            }
         }
         catch (err) {
             console.log("Nada")
@@ -24,7 +33,6 @@ app.get("/all", async (req:any, res:any) => {
 
     res.status(200).send({"posts": posts}).end()
 })
-
 
 app.get("/mostread", async (req:any, res:any) => {
     const postsLinks = await getPostsLinks(".cnvs-block-section-1587397232048")
