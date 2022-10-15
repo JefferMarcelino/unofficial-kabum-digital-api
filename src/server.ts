@@ -12,7 +12,7 @@ function generateRandomInteger(max:number) {
     return Math.floor(Math.random() * max) + 1;
 }
 
-app.get("/random", async (req:any, res:any) => {
+app.get("/random", async (req, res) => {
     const postsLinks = await getPostsLinks(".cnvs-block-section")
     const alreadyFetched: number[] = []
     const posts = []
@@ -34,7 +34,7 @@ app.get("/random", async (req:any, res:any) => {
     res.status(200).send({"posts": posts}).end()
 })
 
-app.get("/mostread", async (req:any, res:any) => {
+app.get("/mostread", async (req, res) => {
     const postsLinks = await getPostsLinks(".cnvs-block-section-1587397232048")
     const posts = []
     
@@ -49,6 +49,16 @@ app.get("/mostread", async (req:any, res:any) => {
     }
 
     res.status(200).send({"posts": posts}).end()
+})
+
+app.get("/post/:id", async (req, res) => {
+    const postLink = req.params.id
+    try {
+        const post = await getPostByLink("https://kabum.digital/" + postLink)
+        res.status(200).send({"post": post}).end()
+    } catch (err) {
+        res.status(404).send({"error": "Not found"})
+    }
 })
 
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`))
