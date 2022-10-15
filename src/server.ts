@@ -2,7 +2,6 @@ import express from 'express'
 import bodyParser from "body-parser"
 import getPostsLinks from './lib/getPostsLinks'
 import getPostByLink from './lib/getPostByLink'
-import timout from "connect-timeout"
 
 const PORT = process.env.PORT || 3000 
 
@@ -24,7 +23,7 @@ app.get("/all/:page", async (req, res) => {
     const page = Number(req.params.page)
     const postsLinks = await getPostsLinks("all", page)
 
-    res.status(200).send({"postsLinks": postsLinks}).end()
+    res.status(200).send({"posts": postsLinks}).end()
 })
 
 app.get("/mostread", async (req, res) => {
