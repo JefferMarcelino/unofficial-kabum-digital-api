@@ -1,7 +1,12 @@
 import axios from "axios";
 import { load } from "cheerio";
 
-const getPostsLinks = async (category: "mostread" | "all", page?:number) => {
+interface getPostByLinksProps {
+    title: string;
+    link: string;
+}
+
+const getPostsLinks = async (category: "mostread" | "all" | "latest", page?:number): Promise<getPostByLinksProps[] | any> => {
     if (category == "mostread") {
         const latestNews = await axios.get("https://kabum.digital/")
 
@@ -30,6 +35,20 @@ const getPostsLinks = async (category: "mostread" | "all", page?:number) => {
         .toArray(); 
 
         return postsData
+    } else if (category == "latest") {
+        try {
+            let latestNews = await axios.get(`https://kabum.digital/`)
+            const $ = load(latestNews.data); 
+
+            const $latest = $(".cnvs-block-posts-1587397404812")
+            
+            return {
+                "title": $latest.find(".cs-entry__title").text().trim(),
+                "link": $latest.find("a").attr("href")
+            }
+        } catch (err) {
+            console.log(err)
+        }
     } else if (category == "all") {
         let next = true
         var allLinks: any[] = []

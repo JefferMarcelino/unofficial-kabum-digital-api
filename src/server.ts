@@ -19,6 +19,17 @@ app.get("/random", async (req, res) => {
     res.status(200).send({"posts": postsLinks}).end()
 })
 
+app.get("/latest", async (req, res) => {
+    const postLink = await getPostsLinks("latest")
+
+    try {
+        const post = await getPostByLink(postLink.link)
+        res.status(200).send({"post": post}).end()
+    } catch (err) {
+        res.status(404).send({"error": "Not found"})
+    }
+})
+
 app.get("/all/:page", async (req, res) => {
     const page = Number(req.params.page)
     const postsLinks = await getPostsLinks("all", page)
