@@ -2,7 +2,6 @@
 
 ## 💻 Project
 
-A simple website that returns a random advice.
 This a unofficial <a href="https://kabum.digital/" target="_blank">Kabum Digital</a> API, created by me to get posts.
 
 ## Endpoints
