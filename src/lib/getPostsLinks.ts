@@ -20,11 +20,11 @@ const getPostsLinks = async (category: "mostread" | "all" | "latest", page?:numb
             .map((_:any, title:any) => { 
                 const $title:any = $(title); 
                 const $link = $title.find("a")
-                var link = $link.attr('href');
-                if (link && title) {
+                var id = $link.attr('href');
+                if (id && title) {
                     return {
                         title: $title.text().trim(),
-                        link: link
+                        id: id.replace("https://kabum.digital/", "").replace("/", "")
                     }
                 }
             }) 
@@ -43,14 +43,15 @@ const getPostsLinks = async (category: "mostread" | "all" | "latest", page?:numb
             const $latest = $(".cnvs-block-posts-1587397404812")
             
             return {
-                "title": $latest.find(".cs-entry__title").text().trim(),
-                "link": $latest.find("a").attr("href")
+                title: $latest.find(".cs-entry__title").text().trim(),
+                id: $latest.find("a").attr("href")
+                ?.replace("https://kabum.digital/", "")
+                .replace("/", "")
             }
         } catch (err) {
             console.log(err)
         }
     } else if (category == "all") {
-        let next = true
         var allLinks: any[] = []
         let index = page || 1
 
@@ -71,7 +72,7 @@ const getPostsLinks = async (category: "mostread" | "all" | "latest", page?:numb
                     if (link && title) {
                         return {
                             title: $title.text().trim(),
-                            link: link
+                            id: link.replace("https://kabum.digital/", "").replace("/", "")
                         }
                     }
                 }) 

@@ -6,7 +6,7 @@ const getPostByLink = async (link:string) => {
     const $ = load(post.data + "")
 
     const $image = $(".wp-post-image")
-    const image = $image.attr('src')
+    const image = $image.attr('data-pk-src')
 
     const content = $(".entry-content")
     .map((_:any, content:any) => { 
