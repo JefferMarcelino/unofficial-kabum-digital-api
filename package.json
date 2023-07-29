@@ -5,7 +5,8 @@
   "main": "src/server.ts",
   "scripts": {
     "dev": "tsnd .",
-    "build": "npm install && tsc"
+    "build": "npm install && tsc",
+    "start": "node build/server.js"
   },
   "keywords": [],
   "author": "Jeffer Marcelino",
