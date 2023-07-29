@@ -4,7 +4,6 @@ import api from "../lib/axios";
 import { GetPagePostsResponse } from "../domain/models/GetPagePostsResponse";
 import { GetAllPosts } from "../domain/models/GetAllPosts";
 
-
 export const getPostDataById = async (id: string): Promise<BlogPost> => {
   const postHTML = await api.get("/" + id);
   const $ = load(postHTML.data + "");
@@ -87,126 +86,54 @@ export const getPagePosts = async (page: number): Promise<GetPagePostsResponse |
                   
     response.posts.push(...allMainPagePosts);
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return;
   };
 
   return response;
 };
 
-/*
 export const getAllPosts = async (): Promise<GetAllPosts> => {
-  const allPosts: any = {
-    posts: [],
-    total: 0
-  };
-
-  let page = 1;
-
-  while(true) {
-    console.log("Now fetching page ", page)
-    const pagePosts = await getPagePosts(page);
-    page++;
-
-    allPosts.posts.push(...pagePosts.posts);
-    console.log("Page ", page, " fetched with success. There are now ", allPosts.posts.length, " posts fetched")
-
-    if (!pagePosts.next) break;
-  }
-
-  allPosts.total = allPosts.posts.length;
-
-  return allPosts;
-};
-*/
-
-export const getAllPosts = async (): Promise<GetAllPosts> => {
-  const allPosts: any = {
-    posts: [],
-    total: 0
-  };
-
-  let page = 1;
+  const NUMBER_OF_INUTIL_CONTENT = 20;
   const MAX_CONCURRENT_REQUESTS = 10;
-  let canBreak = false;
 
-  const fetchPagePromises: Promise<GetPagePostsResponse>[] = [];
+  const allPosts: any = {
+    posts: [],
+    total: 0
+  };
+
+  let currentPage = 1;
 
   while (true) {
-    for (let i = 0; i < MAX_CONCURRENT_REQUESTS; i++) {
-      fetchPagePromises.push(getPagePosts(page));
-    };
-    
-    const pageResponses = await Promise.all(fetchPagePromises);
+    const pagePromises: Promise<GetPagePostsResponse | any>[] = [];
 
-    for (const response of pageResponses) {
-      allPosts.posts.push(...response.posts);
-      if (!response.next) canBreak = true;
+    for (let i = 0; i < MAX_CONCURRENT_REQUESTS; i++) {
+      pagePromises.push(getPagePosts(currentPage + i));
     }
 
-    if (canBreak) {      
+    const responses = await Promise.all(pagePromises);
+
+    let stopFetching = true;
+
+    for (const response of responses) {
+      if (response && response.next) {
+        allPosts.posts.push(...response.posts);
+        stopFetching = false;
+      } else {
+        stopFetching = true;
+        break;
+      };
+    };
+
+    if (stopFetching) {
       break;
     };
+
+    currentPage += MAX_CONCURRENT_REQUESTS;
   };
 
-  allPosts.total = allPosts.posts.length;
+  allPosts.total = allPosts.posts.length - NUMBER_OF_INUTIL_CONTENT;
+  allPosts.posts = allPosts.posts.slice(0, allPosts.total);
 
   return allPosts;
-};
-
-
-export const getBlogPostsLinks = async (
-  category: "mostread" | "all" | "latest", 
-  page?:number
-): Promise<any> => {
-  if (category == "mostread") {
-    const latestNews = await api.get("/");
-
-    const $ = load(latestNews.data); 
-
-    const postsData = $(".cnvs-block-section-1587397232048")
-      .map((_, post) => { 
-        const $post:any = $(post);
-
-        const $titles = $post.find(".cs-entry__title")
-          .map((_:any, title:any) => { 
-            const $title:any = $(title); 
-            const $link = $title.find("a");
-            var id = $link.attr('href');
-
-            if (id && title) {
-              return {
-                title: $title.text().trim(),
-                id: id.replace("https://kabum.digital/", "").replace("/", "")
-              };
-            };
-          }) 
-          .toArray(); 
-
-        return $titles;
-      }) 
-      .toArray(); 
-
-    return postsData;
-  } else if (category == "latest") {
-    try {
-      let latestNews = await api.get("/");
-      const $ = load(latestNews.data);
-
-      const $latest = $(".cnvs-block-posts-1587397404812");
-
-      console.log($latest.find(".cs-entry__title").text().trim())
-      
-      return {
-        title: $latest.find(".cs-entry__title").text().trim(),
-        id: $latest.find("a").attr("href")
-          ?.replace("https://kabum.digital/", "")
-          .replace("/", "")
-      };
-    } catch (err) {
-      console.log(err);
-    }
-  } else if (category == "all") {
-    
-  }
 };
