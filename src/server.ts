@@ -1,51 +1,35 @@
-import express from 'express'
-import bodyParser from "body-parser"
-import getPostsLinks from './lib/getPostsLinks'
-import getPostByLink from './lib/getPostByLink'
+import express from "express";
+import bodyParser from "body-parser";
+import { BlogPostController } from "./interfaces/controllers/BlogPostController";
+import { KabumBlogAPI } from "./interfaces/dataSources/KabumBlogAPI";
 
 const PORT = process.env.PORT || 3000 
 
 const app = express()
 app.use(bodyParser.json())
 
-function generateRandomInteger(max:number) {
-    return Math.floor(Math.random() * max) + 1;
-}
-
-app.get("/random", async (req, res) => {
-    const page = generateRandomInteger(30)
-    const postsLinks = await getPostsLinks("all", page)
-
-    res.status(200).send({"posts": postsLinks}).end()
-})
-
-app.get("/latest", async (req, res) => {
-    const postLink = await getPostsLinks("latest")
-
-    res.status(200).send({"post": postLink}).end()
-})
-
-app.get("/all/:page", async (req, res) => {
-    const page = Number(req.params.page)
-    const postsLinks = await getPostsLinks("all", page)
-
-    res.status(200).send({"posts": postsLinks}).end()
-})
-
-app.get("/mostread", async (req, res) => {
-    const postsLinks = await getPostsLinks("mostread")
-
-    res.status(200).send({"posts": postsLinks}).end()
-})
+const blogPostController = new BlogPostController(new KabumBlogAPI());
 
 app.get("/post/:id", async (req, res) => {
-    const postLink = req.params.id
-    try {
-        const post = await getPostByLink("https://kabum.digital/" + postLink)
-        res.status(200).send({"post": post}).end()
-    } catch (err) {
-        res.status(404).send({"error": "Not found"})
-    }
-})
+  // Data from a post
+  blogPostController.getPostDataById(req, res);
+});
 
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`))
+app.get("/all/:page", async (req, res) => {
+  // All posts from a page
+  blogPostController.getAllPostsFromPage(req, res);
+});
+
+app.get("/all", async (req, res) => {
+  // All posts
+  blogPostController.getAllPosts(req, res);
+});
+
+app.get("/random", async (req, res) => {
+  // Random pages from a page
+  blogPostController.getRandomPost(req, res);
+});
+
+
+
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
