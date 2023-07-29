@@ -30,6 +30,4 @@ app.get("/random", async (req, res) => {
   blogPostController.getRandomPost(req, res);
 });
 
-
-
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

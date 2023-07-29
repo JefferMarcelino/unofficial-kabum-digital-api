@@ -45,9 +45,15 @@ export class BlogPostController {
   };
 
   async getRandomPost(req: Request, res: Response) {
-    const randomPage = Math.floor(Math.random() * 30) + 1;
-    const posts = await this.blogPostRepository.getBlogPostsLinks("all", randomPage);
+    const CURRENT_PAGES_AVAILABLES = 78
+    const randomPage = Math.floor(Math.random() * CURRENT_PAGES_AVAILABLES) + 1;
 
-    res.status(200).send({"posts": posts}).end()
+    try {
+      const posts = await this.blogPostRepository.getPagePosts(randomPage);
+
+      res.status(200).send({ "result": posts }).end();
+    } catch (error) {
+      res.status(500).send({ "error": "internal server error" })
+    };
   };
 };
