@@ -3,8 +3,15 @@ import { BlogPost } from "../domain/models/BlogPost";
 import api from "../lib/axios";
 import { GetPagePostsResponse } from "../domain/models/GetPagePostsResponse";
 import { GetAllPosts } from "../domain/models/GetAllPosts";
+import { cache, getFromCache } from "./cache/cachingFunctions";
 
 export const getPostDataById = async (id: string): Promise<BlogPost> => {
+  const cachedPost = await getFromCache(id) as BlogPost;
+
+  if (cachedPost) {
+    return cachedPost;
+  };
+
   const postHTML = await api.get("/" + id);
   const $ = load(postHTML.data + "");
 
@@ -32,10 +39,18 @@ export const getPostDataById = async (id: string): Promise<BlogPost> => {
     "content": content
   };
 
+  await cache(id, data);
+
   return data;
 };
 
 export const getPagePosts = async (page: number): Promise<GetPagePostsResponse | any> => {
+  const cachedPosts = await getFromCache(`page:${page}`) as BlogPost[];
+
+  if (cachedPosts) {
+    return cachedPosts;
+  };
+
   const response: any = {
     posts: [],
     prev: null,
@@ -90,6 +105,8 @@ export const getPagePosts = async (page: number): Promise<GetPagePostsResponse |
     return;
   };
 
+  await cache(`page:${page}`, response);
+
   return response;
 };
 
@@ -100,6 +117,15 @@ export const getAllPosts = async (): Promise<GetAllPosts> => {
   const allPosts: any = {
     posts: [],
     total: 0
+  };
+
+  const cachedPosts = await getFromCache(`all`) as BlogPost[];
+
+  if (cachedPosts) {
+    allPosts.posts = cachedPosts;
+    allPosts.total = allPosts.posts.length;
+
+    return allPosts;
   };
 
   let currentPage = 1;
@@ -134,6 +160,8 @@ export const getAllPosts = async (): Promise<GetAllPosts> => {
 
   allPosts.total = allPosts.posts.length - NUMBER_OF_INUTIL_CONTENT;
   allPosts.posts = allPosts.posts.slice(0, allPosts.total);
+
+  await cache("all", allPosts.posts);
 
   return allPosts;
 };
