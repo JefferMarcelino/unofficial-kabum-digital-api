@@ -1,0 +1,17 @@
+name: Daily API Request
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  make-request:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Make the API request
+        run: |
+          curl -s https://unofficial-kabum-digital-api.up.railway.app/all
