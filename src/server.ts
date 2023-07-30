@@ -10,6 +10,10 @@ app.use(bodyParser.json())
 
 const blogPostController = new BlogPostController(new KabumBlogAPI());
 
+app.get("/", async (req, res) => {
+  res.status(200).send({ "message": "Working! Acsesss https://github.com/JefferMarcelino/unofficial-kabum-digital-api to see the endpoints." });
+});
+
 app.get("/post/:id", async (req, res) => {
   // Data from a post
   blogPostController.getPostDataById(req, res);
