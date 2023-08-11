@@ -3,4 +3,5 @@ export interface BlogPost {
   link: string;
   image: string;
   content: string[];
-};
+  createAt: string;
+}
