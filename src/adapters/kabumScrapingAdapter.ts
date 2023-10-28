@@ -18,7 +18,7 @@ export const getPostDataById = async (id: string): Promise<BlogPost> => {
   const $image = $(".wp-post-image");
   const image = $image.attr('data-pk-src') || "";
 
-  const content = $(".entry-content")
+  const content = $("#content")
     .map((_:any, content:any) => { 
       const $content:any = $(content); 
       const $paragraphs:any = $content.find("p")
@@ -33,7 +33,7 @@ export const getPostDataById = async (id: string): Promise<BlogPost> => {
     .toArray();
 
   const data = {
-    "title": $(".cs-entry__title").text(),
+    "title": $("h1.cs-entry__title").text(),
     "link": `${api.defaults.baseURL}/${id}`,
     "image": image,
     "content": content
